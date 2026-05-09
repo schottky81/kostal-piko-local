@@ -6,15 +6,15 @@ const Homey = require('homey');
 const DXS_FAST = {
   measure_power_solar: 67109120,
   measure_frequency: 67110400,
-  grid_voltage_l1: 67109378,
-  grid_current_l1: 67109377,
-  grid_power_l1: 67109379,
-  grid_voltage_l2: 67109634,
-  grid_current_l2: 67109633,
-  grid_power_l2: 67109635,
-  grid_voltage_l3: 67109890,
-  grid_current_l3: 67109889,
-  grid_power_l3: 67109891
+  measure_voltage: 67109378,
+  measure_current: 67109377,
+  measure_power_l1: 67109379,
+  measure_voltage_l2: 67109634,
+  measure_current_l2: 67109633,
+  measure_power_l2: 67109635,
+  measure_voltage_l3: 67109890,
+  measure_current_l3: 67109889,
+  measure_power_l3: 67109891
 };
 
 const DXS_SLOW = {
@@ -42,15 +42,15 @@ class KostalPikoDevice extends Homey.Device {
     const required = [
       'measure_power_solar',
       'meter_power',
-      'grid_power_l1',
-      'grid_power_l2',
-      'grid_power_l3',
-      'grid_voltage_l1',
-      'grid_voltage_l2',
-      'grid_voltage_l3',
-      'grid_current_l1',
-      'grid_current_l2',
-      'grid_current_l3',
+      'measure_power_l1',
+      'measure_power_l2',
+      'measure_power_l3',
+      'measure_voltage',
+      'measure_voltage_l2',
+      'measure_voltage_l3',
+      'measure_current',
+      'measure_current_l2',
+      'measure_current_l3',
       'alarm_generic'
     ];
 
@@ -65,7 +65,7 @@ class KostalPikoDevice extends Homey.Device {
     }
 
     // Remove deprecated capabilities
-    const deprecated = ['measure_power', 'measure_power_l1', 'measure_power_l2', 'measure_power_l3', 'measure_voltage', 'measure_current', 'measure_voltage_l2', 'measure_voltage_l3', 'measure_current_l2', 'measure_current_l3'];
+    const deprecated = ['measure_power'];
     for (const capabilityId of deprecated) {
       if (this.hasCapability(capabilityId)) {
         try {
@@ -73,20 +73,6 @@ class KostalPikoDevice extends Homey.Device {
           this.log(`Removed deprecated capability: ${capabilityId}`);
         } catch (error) {
           this.error(`Failed to remove capability ${capabilityId}:`, error.message);
-        }
-      }
-    }
-
-    // If legacy measure_voltage/measure_current (L1 only) could not be removed, zero them out
-    // to prevent Homey from computing a wrong energy_power (V×I) value.
-    const legacyToZero = ['measure_voltage', 'measure_current'];
-    for (const capId of legacyToZero) {
-      if (this.hasCapability(capId)) {
-        try {
-          await this.setCapabilityValue(capId, 0);
-          this.log(`Zeroed legacy capability: ${capId}`);
-        } catch (error) {
-          this.error(`Failed to zero capability ${capId}:`, error.message);
         }
       }
     }
@@ -239,15 +225,15 @@ class KostalPikoDevice extends Homey.Device {
     if (pollType === 'fast') {
       await this._setNumberCapability('measure_power_solar', this._extractValue(payload, DXS_FAST.measure_power_solar));
       await this._setNumberCapability('measure_frequency', this._extractValue(payload, DXS_FAST.measure_frequency));
-      await this._setNumberCapability('grid_voltage_l1', this._extractValue(payload, DXS_FAST.grid_voltage_l1));
-      await this._setNumberCapability('grid_current_l1', this._extractValue(payload, DXS_FAST.grid_current_l1));
-      await this._setNumberCapability('grid_power_l1', this._extractValue(payload, DXS_FAST.grid_power_l1));
-      await this._setNumberCapability('grid_voltage_l2', this._extractValue(payload, DXS_FAST.grid_voltage_l2));
-      await this._setNumberCapability('grid_current_l2', this._extractValue(payload, DXS_FAST.grid_current_l2));
-      await this._setNumberCapability('grid_power_l2', this._extractValue(payload, DXS_FAST.grid_power_l2));
-      await this._setNumberCapability('grid_voltage_l3', this._extractValue(payload, DXS_FAST.grid_voltage_l3));
-      await this._setNumberCapability('grid_current_l3', this._extractValue(payload, DXS_FAST.grid_current_l3));
-      await this._setNumberCapability('grid_power_l3', this._extractValue(payload, DXS_FAST.grid_power_l3));
+      await this._setNumberCapability('measure_voltage', this._extractValue(payload, DXS_FAST.measure_voltage));
+      await this._setNumberCapability('measure_current', this._extractValue(payload, DXS_FAST.measure_current));
+      await this._setNumberCapability('measure_power_l1', this._extractValue(payload, DXS_FAST.measure_power_l1));
+      await this._setNumberCapability('measure_voltage_l2', this._extractValue(payload, DXS_FAST.measure_voltage_l2));
+      await this._setNumberCapability('measure_current_l2', this._extractValue(payload, DXS_FAST.measure_current_l2));
+      await this._setNumberCapability('measure_power_l2', this._extractValue(payload, DXS_FAST.measure_power_l2));
+      await this._setNumberCapability('measure_voltage_l3', this._extractValue(payload, DXS_FAST.measure_voltage_l3));
+      await this._setNumberCapability('measure_current_l3', this._extractValue(payload, DXS_FAST.measure_current_l3));
+      await this._setNumberCapability('measure_power_l3', this._extractValue(payload, DXS_FAST.measure_power_l3));
       return;
     }
 
