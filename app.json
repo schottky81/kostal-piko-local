@@ -110,8 +110,8 @@
         }
       },
       "images": {
-        "small": "/drivers/kostal_piko/assets/small.png",
-        "large": "/drivers/kostal_piko/assets/large.png"
+        "small": "/assets/small.png",
+        "large": "/assets/large.png"
       },
       "pair": [
         {
