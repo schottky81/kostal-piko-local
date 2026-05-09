@@ -30,18 +30,23 @@
         "en": "Kostal PIKO"
       },
       "class": "solarpanel",
+      "energy": {
+        "approximation": {
+          "usageConstant": 0
+        }
+      },
       "capabilities": [
         "measure_power_solar",
         "meter_power",
         "grid_power_l1",
         "grid_power_l2",
         "grid_power_l3",
-        "measure_voltage",
-        "measure_voltage_l2",
-        "measure_voltage_l3",
-        "measure_current",
-        "measure_current_l2",
-        "measure_current_l3",
+        "grid_voltage_l1",
+        "grid_voltage_l2",
+        "grid_voltage_l3",
+        "grid_current_l1",
+        "grid_current_l2",
+        "grid_current_l3",
         "alarm_generic"
       ],
       "capabilitiesOptions": {
@@ -70,32 +75,32 @@
             "en": "Grid power (L3)"
           }
         },
-        "measure_voltage": {
+        "grid_voltage_l1": {
           "title": {
             "en": "Grid voltage (L1)"
           }
         },
-        "measure_voltage_l2": {
+        "grid_voltage_l2": {
           "title": {
             "en": "Grid voltage (L2)"
           }
         },
-        "measure_voltage_l3": {
+        "grid_voltage_l3": {
           "title": {
             "en": "Grid voltage (L3)"
           }
         },
-        "measure_current": {
+        "grid_current_l1": {
           "title": {
             "en": "Grid current (L1)"
           }
         },
-        "measure_current_l2": {
+        "grid_current_l2": {
           "title": {
             "en": "Grid current (L2)"
           }
         },
-        "measure_current_l3": {
+        "grid_current_l3": {
           "title": {
             "en": "Grid current (L3)"
           }
@@ -180,6 +185,51 @@
     }
   ],
   "capabilities": {
+    "grid_current_l1": {
+      "type": "number",
+      "title": {
+        "en": "Grid current (L1)"
+      },
+      "units": {
+        "en": "A"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "icon": "assets/icon.svg"
+    },
+    "grid_current_l2": {
+      "type": "number",
+      "title": {
+        "en": "Grid current (L2)"
+      },
+      "units": {
+        "en": "A"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "icon": "assets/icon.svg"
+    },
+    "grid_current_l3": {
+      "type": "number",
+      "title": {
+        "en": "Grid current (L3)"
+      },
+      "units": {
+        "en": "A"
+      },
+      "decimals": 2,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "icon": "assets/icon.svg"
+    },
     "grid_power_l1": {
       "type": "number",
       "title": {
@@ -225,43 +275,13 @@
       "uiComponent": "sensor",
       "icon": "assets/icon.svg"
     },
-    "measure_current_l2": {
+    "grid_voltage_l1": {
       "type": "number",
       "title": {
-        "en": "Grid current (L2)"
+        "en": "Grid voltage (L1)"
       },
       "units": {
-        "en": "A"
-      },
-      "decimals": 2,
-      "getable": true,
-      "setable": false,
-      "insights": true,
-      "uiComponent": "sensor",
-      "icon": "assets/icon.svg"
-    },
-    "measure_current_l3": {
-      "type": "number",
-      "title": {
-        "en": "Grid current (L3)"
-      },
-      "units": {
-        "en": "A"
-      },
-      "decimals": 2,
-      "getable": true,
-      "setable": false,
-      "insights": true,
-      "uiComponent": "sensor",
-      "icon": "assets/icon.svg"
-    },
-    "measure_power_solar": {
-      "type": "number",
-      "title": {
-        "en": "Solar production"
-      },
-      "units": {
-        "en": "W"
+        "en": "V"
       },
       "decimals": 1,
       "getable": true,
@@ -270,7 +290,7 @@
       "uiComponent": "sensor",
       "icon": "assets/icon.svg"
     },
-    "measure_voltage_l2": {
+    "grid_voltage_l2": {
       "type": "number",
       "title": {
         "en": "Grid voltage (L2)"
@@ -285,13 +305,28 @@
       "uiComponent": "sensor",
       "icon": "assets/icon.svg"
     },
-    "measure_voltage_l3": {
+    "grid_voltage_l3": {
       "type": "number",
       "title": {
         "en": "Grid voltage (L3)"
       },
       "units": {
         "en": "V"
+      },
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "icon": "assets/icon.svg"
+    },
+    "measure_power_solar": {
+      "type": "number",
+      "title": {
+        "en": "Solar production"
+      },
+      "units": {
+        "en": "W"
       },
       "decimals": 1,
       "getable": true,

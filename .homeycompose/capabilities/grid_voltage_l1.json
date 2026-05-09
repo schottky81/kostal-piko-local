@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Grid voltage (L1)"
+  },
+  "units": {
+    "en": "V"
+  },
+  "decimals": 1,
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "uiComponent": "sensor",
+  "icon": "assets/icon.svg"
+}
