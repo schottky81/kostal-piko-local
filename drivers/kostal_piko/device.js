@@ -7,7 +7,14 @@ const DXS_FAST = {
   measure_power_solar: 67109120,
   measure_frequency: 67110400,
   measure_voltage: 67109378,
-  measure_current: 67109377
+  measure_current: 67109377,
+  measure_power_l1: 67109379,
+  measure_voltage_l2: 67109634,
+  measure_current_l2: 67109633,
+  measure_power_l2: 67109635,
+  measure_voltage_l3: 67109890,
+  measure_current_l3: 67109889,
+  measure_power_l3: 67109891
 };
 
 const DXS_SLOW = {
@@ -25,8 +32,37 @@ class KostalPikoDevice extends Homey.Device {
     this._isPolling = false;
     this._failureCount = 0;
 
+    await this._ensureCapabilities();
+
     await this._startPolling();
     this.log('Kostal PIKO device initialized');
+  }
+
+  async _ensureCapabilities() {
+    const required = [
+      'measure_power_solar',
+      'meter_power',
+      'measure_power_l1',
+      'measure_power_l2',
+      'measure_power_l3',
+      'measure_voltage',
+      'measure_voltage_l2',
+      'measure_voltage_l3',
+      'measure_current',
+      'measure_current_l2',
+      'measure_current_l3',
+      'alarm_generic'
+    ];
+
+    for (const capabilityId of required) {
+      if (!this.hasCapability(capabilityId)) {
+        try {
+          await this.addCapability(capabilityId);
+        } catch (error) {
+          this.error(`Failed to add capability ${capabilityId}:`, error.message);
+        }
+      }
+    }
   }
 
   async onDeleted() {
@@ -178,6 +214,13 @@ class KostalPikoDevice extends Homey.Device {
       await this._setNumberCapability('measure_frequency', this._extractValue(payload, DXS_FAST.measure_frequency));
       await this._setNumberCapability('measure_voltage', this._extractValue(payload, DXS_FAST.measure_voltage));
       await this._setNumberCapability('measure_current', this._extractValue(payload, DXS_FAST.measure_current));
+      await this._setNumberCapability('measure_power_l1', this._extractValue(payload, DXS_FAST.measure_power_l1));
+      await this._setNumberCapability('measure_voltage_l2', this._extractValue(payload, DXS_FAST.measure_voltage_l2));
+      await this._setNumberCapability('measure_current_l2', this._extractValue(payload, DXS_FAST.measure_current_l2));
+      await this._setNumberCapability('measure_power_l2', this._extractValue(payload, DXS_FAST.measure_power_l2));
+      await this._setNumberCapability('measure_voltage_l3', this._extractValue(payload, DXS_FAST.measure_voltage_l3));
+      await this._setNumberCapability('measure_current_l3', this._extractValue(payload, DXS_FAST.measure_current_l3));
+      await this._setNumberCapability('measure_power_l3', this._extractValue(payload, DXS_FAST.measure_power_l3));
       return;
     }
 

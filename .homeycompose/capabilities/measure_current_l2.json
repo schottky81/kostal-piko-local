@@ -1,0 +1,15 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Grid current (L2)"
+  },
+  "units": {
+    "en": "A"
+  },
+  "decimals": 2,
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "uiComponent": "sensor",
+  "icon": "assets/icon.svg"
+}
