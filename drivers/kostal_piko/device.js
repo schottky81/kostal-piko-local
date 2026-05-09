@@ -63,6 +63,19 @@ class KostalPikoDevice extends Homey.Device {
         }
       }
     }
+
+    // Remove deprecated capabilities
+    const deprecated = ['measure_power'];
+    for (const capabilityId of deprecated) {
+      if (this.hasCapability(capabilityId)) {
+        try {
+          await this.removeCapability(capabilityId);
+          this.log(`Removed deprecated capability: ${capabilityId}`);
+        } catch (error) {
+          this.error(`Failed to remove capability ${capabilityId}:`, error.message);
+        }
+      }
+    }
   }
 
   async onDeleted() {
