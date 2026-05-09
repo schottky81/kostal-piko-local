@@ -1,0 +1,26 @@
+{
+  "id": "com.raphandco.kostalpiko.local",
+  "version": "0.0.1",
+  "sdk": 3,
+  "compatibility": ">=10.0.0",
+  "platforms": [
+    "local"
+  ],
+  "author": {
+    "name": "raphandco",
+    "email": "homey@raphandco.local"
+  },
+  "name": {
+    "en": "Kostal PIKO (Local)"
+  },
+  "description": {
+    "en": "Reads data from a Kostal PIKO inverter using the local HTTP API."
+  },
+  "category": [
+    "energy"
+  ],
+  "images": {
+    "small": "/assets/small.png",
+    "large": "/assets/large.png"
+  }
+}

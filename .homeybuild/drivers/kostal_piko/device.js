@@ -1,0 +1,211 @@
+'use strict';
+
+const http = require('http');
+const Homey = require('homey');
+
+const DXS_FAST = {
+  measure_power_solar: 67109120,
+  measure_frequency: 67110400,
+  measure_voltage: 67109378,
+  measure_current: 67109377
+};
+
+const DXS_SLOW = {
+  meter_power: 251658753,
+  inverter_name: 16777984,
+  serial_number: 16777728,
+  firmware_version: 16779265,
+  operating_status: 16780032
+};
+
+class KostalPikoDevice extends Homey.Device {
+  async onInit() {
+    this._fastInterval = null;
+    this._slowInterval = null;
+    this._isPolling = false;
+    this._failureCount = 0;
+
+    await this._startPolling();
+    this.log('Kostal PIKO device initialized');
+  }
+
+  async onDeleted() {
+    this._stopPolling();
+  }
+
+  async onSettings({ changedKeys }) {
+    if (
+      changedKeys.includes('host')
+      || changedKeys.includes('fast_poll_seconds')
+      || changedKeys.includes('slow_poll_seconds')
+      || changedKeys.includes('request_timeout_ms')
+      || changedKeys.includes('max_failures_before_unavailable')
+    ) {
+      this._stopPolling();
+      await this._startPolling();
+    }
+  }
+
+  _stopPolling() {
+    if (this._fastInterval) {
+      this.homey.clearInterval(this._fastInterval);
+      this._fastInterval = null;
+    }
+
+    if (this._slowInterval) {
+      this.homey.clearInterval(this._slowInterval);
+      this._slowInterval = null;
+    }
+  }
+
+  async _startPolling() {
+    const fastSeconds = this.getSetting('fast_poll_seconds') || 15;
+    const slowSeconds = this.getSetting('slow_poll_seconds') || 60;
+
+    await this._pollFast();
+    await this._pollSlow();
+
+    this._fastInterval = this.homey.setInterval(async () => {
+      await this._pollFast();
+    }, fastSeconds * 1000);
+
+    this._slowInterval = this.homey.setInterval(async () => {
+      await this._pollSlow();
+    }, slowSeconds * 1000);
+  }
+
+  async _pollFast() {
+    await this._pollAndApply(Object.values(DXS_FAST), 'fast');
+  }
+
+  async _pollSlow() {
+    await this._pollAndApply(Object.values(DXS_SLOW), 'slow');
+  }
+
+  async _pollAndApply(dxsIds, pollType) {
+    if (this._isPolling) {
+      return;
+    }
+
+    this._isPolling = true;
+
+    try {
+      const payload = await this._getDxsValues(dxsIds);
+      await this._applyPayload(payload, pollType);
+      this._failureCount = 0;
+      await this.setAvailable().catch(() => {});
+      await this.setCapabilityValue('alarm_generic', false).catch(() => {});
+    } catch (error) {
+      this._failureCount += 1;
+      const limit = this.getSetting('max_failures_before_unavailable') || 3;
+
+      this.error(`Polling failed (${pollType}):`, error.message);
+
+      if (this._failureCount >= limit) {
+        await this.setCapabilityValue('alarm_generic', true).catch(() => {});
+        await this.setUnavailable(`Kostal API unreachable: ${error.message}`).catch(() => {});
+      }
+    } finally {
+      this._isPolling = false;
+    }
+  }
+
+  _buildQuery(dxsIds) {
+    const parts = [];
+    for (const id of dxsIds) {
+      parts.push(`dxsEntries=${encodeURIComponent(id)}`);
+    }
+    return parts.join('&');
+  }
+
+  async _getDxsValues(dxsIds) {
+    const host = this.getSetting('host');
+    const timeout = this.getSetting('request_timeout_ms') || 5000;
+    const path = `/api/dxs.json?${this._buildQuery(dxsIds)}`;
+
+    return new Promise((resolve, reject) => {
+      const req = http.request(
+        {
+          host,
+          port: 80,
+          path,
+          method: 'GET',
+          timeout
+        },
+        (res) => {
+          let raw = '';
+
+          res.setEncoding('utf8');
+          res.on('data', (chunk) => {
+            raw += chunk;
+          });
+
+          res.on('end', () => {
+            try {
+              const json = JSON.parse(raw);
+              if (!json || !Array.isArray(json.dxsEntries)) {
+                reject(new Error('Invalid dxs payload'));
+                return;
+              }
+              resolve(json);
+            } catch (e) {
+              reject(new Error(`Invalid JSON response: ${e.message}`));
+            }
+          });
+        }
+      );
+
+      req.on('timeout', () => {
+        req.destroy(new Error('Request timeout'));
+      });
+
+      req.on('error', (err) => {
+        reject(err);
+      });
+
+      req.end();
+    });
+  }
+
+  _extractValue(payload, dxsId) {
+    const found = payload.dxsEntries.find((entry) => Number(entry.dxsId) === Number(dxsId));
+    return found ? found.value : null;
+  }
+
+  async _applyPayload(payload, pollType) {
+    if (pollType === 'fast') {
+      await this._setNumberCapability('measure_power_solar', this._extractValue(payload, DXS_FAST.measure_power_solar));
+      await this._setNumberCapability('measure_frequency', this._extractValue(payload, DXS_FAST.measure_frequency));
+      await this._setNumberCapability('measure_voltage', this._extractValue(payload, DXS_FAST.measure_voltage));
+      await this._setNumberCapability('measure_current', this._extractValue(payload, DXS_FAST.measure_current));
+      return;
+    }
+
+    await this._setNumberCapability('meter_power', this._extractValue(payload, DXS_SLOW.meter_power));
+
+    const metadata = {
+      inverterName: this._extractValue(payload, DXS_SLOW.inverter_name),
+      serialNumber: this._extractValue(payload, DXS_SLOW.serial_number),
+      firmwareVersion: this._extractValue(payload, DXS_SLOW.firmware_version),
+      operatingStatus: this._extractValue(payload, DXS_SLOW.operating_status),
+      lastUpdate: new Date().toISOString()
+    };
+
+    await this.setStoreValue('metadata', metadata).catch(() => {});
+  }
+
+  async _setNumberCapability(capabilityId, rawValue) {
+    if (!this.hasCapability(capabilityId)) {
+      return;
+    }
+
+    if (rawValue === null || rawValue === undefined || Number.isNaN(Number(rawValue))) {
+      return;
+    }
+
+    const rounded = Math.round(Number(rawValue) * 1000) / 1000;
+    await this.setCapabilityValue(capabilityId, rounded);
+  }
+}
+
+module.exports = KostalPikoDevice;

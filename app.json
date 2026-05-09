@@ -1,0 +1,152 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.raphandco.kostalpiko.local",
+  "version": "0.0.1",
+  "sdk": 3,
+  "compatibility": ">=10.0.0",
+  "platforms": [
+    "local"
+  ],
+  "author": {
+    "name": "raphandco",
+    "email": "homey@raphandco.local"
+  },
+  "name": {
+    "en": "Kostal PIKO (Local)"
+  },
+  "description": {
+    "en": "Reads data from a Kostal PIKO inverter using the local HTTP API."
+  },
+  "category": [
+    "energy"
+  ],
+  "images": {
+    "small": "/assets/small.png",
+    "large": "/assets/large.png"
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Kostal PIKO"
+      },
+      "class": "solarpanel",
+      "capabilities": [
+        "measure_power_solar",
+        "meter_power",
+        "measure_voltage",
+        "measure_current",
+        "alarm_generic"
+      ],
+      "capabilitiesOptions": {
+        "meter_power": {
+          "title": {
+            "en": "Total yield"
+          }
+        },
+        "measure_voltage": {
+          "title": {
+            "en": "Grid voltage (L1)"
+          }
+        },
+        "measure_current": {
+          "title": {
+            "en": "Grid current (L1)"
+          }
+        },
+        "alarm_generic": {
+          "title": {
+            "en": "Communication error"
+          }
+        }
+      },
+      "images": {
+        "small": "/drivers/kostal_piko/assets/small.png",
+        "large": "/drivers/kostal_piko/assets/large.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "id": "host",
+          "type": "text",
+          "label": {
+            "en": "Inverter host"
+          },
+          "hint": {
+            "en": "IP or hostname of the inverter (without http://)."
+          },
+          "value": "172.22.22.142"
+        },
+        {
+          "id": "fast_poll_seconds",
+          "type": "number",
+          "label": {
+            "en": "Fast polling interval (seconds)"
+          },
+          "value": 15,
+          "min": 5,
+          "max": 300
+        },
+        {
+          "id": "slow_poll_seconds",
+          "type": "number",
+          "label": {
+            "en": "Slow polling interval (seconds)"
+          },
+          "value": 60,
+          "min": 15,
+          "max": 3600
+        },
+        {
+          "id": "request_timeout_ms",
+          "type": "number",
+          "label": {
+            "en": "HTTP timeout (ms)"
+          },
+          "value": 5000,
+          "min": 1000,
+          "max": 60000
+        },
+        {
+          "id": "max_failures_before_unavailable",
+          "type": "number",
+          "label": {
+            "en": "Failures before setting device unavailable"
+          },
+          "value": 3,
+          "min": 1,
+          "max": 20
+        }
+      ],
+      "id": "kostal_piko"
+    }
+  ],
+  "capabilities": {
+    "measure_power_solar": {
+      "type": "number",
+      "title": {
+        "en": "Solar production"
+      },
+      "units": {
+        "en": "W"
+      },
+      "decimals": 1,
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "uiComponent": "sensor",
+      "icon": "assets/icon.svg"
+    }
+  }
+}
