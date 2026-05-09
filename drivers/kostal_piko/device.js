@@ -73,20 +73,20 @@ class KostalPikoDevice extends Homey.Device {
           this.log(`Removed deprecated capability: ${capabilityId}`);
         } catch (error) {
           this.error(`Failed to remove capability ${capabilityId}:`, error.message);
+        }
+      }
+    }
 
-            // If legacy power-related capabilities could not be removed, zero them out
-            // to prevent Homey from computing a wrong energy_power (V×I) value.
-            const legacyToZero = ['measure_voltage', 'measure_current', 'measure_voltage_l2', 'measure_voltage_l3', 'measure_current_l2', 'measure_current_l3'];
-            for (const capabilityId of legacyToZero) {
-              if (this.hasCapability(capabilityId)) {
-                try {
-                  await this.setCapabilityValue(capabilityId, 0);
-                  this.log(`Zeroed legacy capability: ${capabilityId}`);
-                } catch (error) {
-                  this.error(`Failed to zero capability ${capabilityId}:`, error.message);
-                }
-              }
-            }
+    // If legacy measure_voltage/measure_current (L1 only) could not be removed, zero them out
+    // to prevent Homey from computing a wrong energy_power (V×I) value.
+    const legacyToZero = ['measure_voltage', 'measure_current'];
+    for (const capId of legacyToZero) {
+      if (this.hasCapability(capId)) {
+        try {
+          await this.setCapabilityValue(capId, 0);
+          this.log(`Zeroed legacy capability: ${capId}`);
+        } catch (error) {
+          this.error(`Failed to zero capability ${capId}:`, error.message);
         }
       }
     }
